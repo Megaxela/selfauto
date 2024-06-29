@@ -1,0 +1,31 @@
+[build-system]
+requires = [
+    "hatchling",
+    "python-telegram-bot >= 21",
+    "aiohttp",
+    "aiosqlite >= 0.20",
+    "dacite",
+    "pyyaml",
+    "aiofiles"
+]
+
+build-backend = "hatchling.build"
+
+[project]
+name = "selfauto"
+version = "0.0.1"
+authors = [
+  { name="Megaxela", email="xelamegaxela@gmail.com" },
+]
+description = "Package for my automation services"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/megaxela/selfauto"
+Issues = "https://github.com/megaxela/selfauto/issues"
