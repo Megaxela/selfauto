@@ -13,9 +13,9 @@ class WebserverComponent(BasicComponent):
         listen: str
         port: int
 
-        @staticmethod
-        def make_default():
-            return Config(listen="127.0.0.1", port=2000)
+    @staticmethod
+    def make_default_config():
+        return WebserverComponent.Config(listen="127.0.0.1", port=2000)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -12,9 +12,12 @@ class GitlabComponent(BasicComponent):
         token: str
         host: str
 
-        @staticmethod
-        def make_default():
-            return Config(token="<gitlab_token>", host="https://you_gitlab_instance")
+    @staticmethod
+    def make_default_config():
+        return GitlabComponent.Config(
+            token="<gitlab_token>",
+            host="https://you_gitlab_instance",
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

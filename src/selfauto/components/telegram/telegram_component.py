@@ -49,9 +49,9 @@ class TelegramComponent(BasicComponent):
     class Config:
         bot_token: str
 
-        @staticmethod
-        def make_default():
-            return Config(bot_token="<telegram_bot_token>")
+    @staticmethod
+    def make_default_config() -> Config:
+        return TelegramComponent.Config(bot_token="<telegram_bot_token>")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

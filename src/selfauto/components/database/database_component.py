@@ -16,9 +16,9 @@ class DatabaseComponent(BasicComponent):
     class Config:
         path: str
 
-        @staticmethod
-        def make_default():
-            return Config(path="./db.sqlite")
+    @staticmethod
+    def make_default_config():
+        return DatabaseComponent.Config(path="./db.sqlite")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

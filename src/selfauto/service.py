@@ -43,15 +43,15 @@ class Service:
     async def generate_default_config(self, path: str):
         config = Config(
             components={
-                component_name: type(component).Config.make_default()
-                for component in self._components
+                component_name: type(component).make_default_config()
+                for component_name, component in self._components.items()
                 if hasattr(type(component), "Config")
-                if hasattr(type(component).Config, "make_default")
+                if hasattr(type(component), "make_default_config")
             }
         )
 
         async with aiofiles.open(path, "w") as f:
-            await f.write(yaml.dump(dataclasses.asdict(config)))
+            await f.write(yaml.dump({"config": dataclasses.asdict(config)}))
 
     async def stop(self):
         logging.info("Stopping execution")
@@ -113,7 +113,7 @@ class Service:
         try:
             if hasattr(type(component), "Config"):
                 component_name = type(component).NAME
-                if component_name not in self._config.components:
+                if component_name not in config.components:
                     raise RuntimeError(
                         f"No component '{component_name}' config in config file"
                     )
