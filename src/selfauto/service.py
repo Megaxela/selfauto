@@ -26,7 +26,7 @@ class Service:
         if self._logger is not None:
             return self._logger
 
-        self._logger = self.__make_logger(__name__)
+        self._logger = self.make_logger(__name__)
         return self._logger
 
     def add_components(self, cls_list):
@@ -40,10 +40,10 @@ class Service:
         if cls.NAME in self._components:
             raise RuntimeError(f"Component '{cls.NAME}' is already registered")
 
-        logger = self.__make_logger(cls.NAME)
-        self._components[cls.NAME] = cls(self._components, logger)
+        logger = self.make_logger(cls.NAME)
+        self._components[cls.NAME] = cls(self._components, logger, self)
 
-    def __make_logger(self, name: str):
+    def make_logger(self, name: str):
         if self._logger_factory is None:
             return getLogger(name)
 

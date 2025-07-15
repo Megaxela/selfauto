@@ -9,15 +9,25 @@ import aiofiles
 
 
 class BasicComponent(ABC):
-    def __init__(self, components: Dict[str, "BasicComponent"], logger: Logger):
+    def __init__(
+        self,
+        components: Dict[str, "BasicComponent"],
+        logger: Logger,
+        service: "Service",
+    ):
         self._components: Dict[str, "BasicComponent"] = components
         self._initialized: bool = False
         self._initialized_condvar: Condition = Condition()
         self._logger: Logger = logger
+        self._service = service
 
     @property
     def logger(self) -> Logger:
         return self._logger
+
+    @property
+    def service(self) -> "Service":
+        return self._service
 
     async def wait_for_initialization(self):
         async with self._initialized_condvar:
