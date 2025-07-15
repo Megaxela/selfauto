@@ -1,4 +1,4 @@
-import dataclasses
+from dataclasses import dataclass
 
 import aiohttp.web
 
@@ -8,7 +8,7 @@ from selfauto.components.basic_component import BasicComponent
 class WebserverComponent(BasicComponent):
     NAME = "webserver"
 
-    @dataclasses.dataclass()
+    @dataclass()
     class Config:
         listen: str
         port: int
@@ -36,4 +36,5 @@ class WebserverComponent(BasicComponent):
             port=self._config.port,
             handle_signals=False,
             print=None,
+            access_log=self.logger,
         )

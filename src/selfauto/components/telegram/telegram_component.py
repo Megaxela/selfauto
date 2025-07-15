@@ -1,16 +1,12 @@
-import typing as tp
-import logging
-import traceback
-import dataclasses
-import asyncio
+from traceback import format_exception
+from dataclasses import dataclass
+from asyncio import sleep
 
 from selfauto.components.basic_component import BasicComponent
 
-import telegram
-import telegram.ext
-import telegram.error
-
-logger = logging.getLogger(__name__)
+from telegram import Update
+from telegram.ext import ContextTypes
+from telegram.error import TelegramError
 
 DEFAULT_ERROR_NOTIFY_TEXT = """
 ⚙️ Internal error occured
@@ -45,7 +41,7 @@ class ApplicationRunner:
 class TelegramComponent(BasicComponent):
     NAME = "telegram"
 
-    @dataclasses.dataclass()
+    @dataclass()
     class Config:
         bot_token: str
 
@@ -55,7 +51,7 @@ class TelegramComponent(BasicComponent):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._app: tp.Optional[telegram.ext.Application] = None
+        self._app: telegram.ext.Application | None = None
         self._error_notify_text = DEFAULT_ERROR_NOTIFY_TEXT
 
     @staticmethod
@@ -64,12 +60,12 @@ class TelegramComponent(BasicComponent):
 
     async def __error_handler(
         self,
-        update: telegram.Update,
-        context: telegram.ext.ContextTypes.DEFAULT_TYPE,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
     ):
-        logger.error("Error occured, during bot execution", exc_info=context.error)
+        self.logger.error("Error occured, during bot execution", exc_info=context.error)
 
-        traceback_list = traceback.format_exception(
+        traceback_list = format_exception(
             None, context.error, context.error.__traceback__
         )
         traceback_str = "".join(traceback_list)
@@ -91,11 +87,11 @@ class TelegramComponent(BasicComponent):
             parse_mode=telegram.constants.ParseMode.MARKDOWN_V2,
         )
 
-    def __run_error_callback(self, exc: telegram.error.TelegramError):
+    def __run_error_callback(self, exc: TelegramError):
         try:
             self._app.create_task(self._app.process_error(error=exc, update=None))
         except Exception as e:
-            logger.error(f"Internal error during error processing", exc_info=e)
+            self.logger.error(f"Internal error during error processing", exc_info=e)
 
     @property
     def application(self) -> telegram.ext.Application:
@@ -109,19 +105,17 @@ class TelegramComponent(BasicComponent):
             try:
                 await self._app.bot.send_message(*args, chat_id=chat_id, **kwargs)
             except Exception as e:
-                logger.error("Unable to notify %s chat", str(chat_id), exc_info=e)
+                self.logger.error("Unable to notify %s chat", str(chat_id), exc_info=e)
 
     async def on_initialize(self, config: Config):
         self._app = telegram.ext.Application.builder().token(config.bot_token).build()
         self._app.add_error_handler(self.__error_handler)
         self._app.add_handler(telegram.ext.CommandHandler("test", self.__test))
 
-    async def __test(
-        self, update: telegram.Update, context: telegram.ext.ContextTypes.DEFAULT_TYPE
-    ):
+    async def __test(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await notify(text="Hello")
 
     async def run(self):
         async with ApplicationRunner(self._app, self.__run_error_callback):
             while 1:
-                await asyncio.sleep(1)
+                await sleep(1)
