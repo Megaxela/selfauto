@@ -14,10 +14,15 @@ class WebserverComponent(BasicComponent):
     class Config:
         listen: str
         port: int
+        access_log_enabled: bool = True
 
     @staticmethod
     def make_default_config():
-        return WebserverComponent.Config(listen="127.0.0.1", port=2000)
+        return WebserverComponent.Config(
+            listen="127.0.0.1",
+            port=2000,
+            access_log_enabled=False,
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,7 +49,7 @@ class WebserverComponent(BasicComponent):
             port=self._config.port,
             handle_signals=False,
             print=None,
-            access_log=self.logger,
+            access_log=self.logger if self._config.access_log_enabled else None,
         )
 
     def __make_handler(self, actual_handler):
