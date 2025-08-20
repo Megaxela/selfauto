@@ -5,7 +5,7 @@ from asyncio import sleep
 from selfauto.components.basic_component import BasicComponent
 
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, Application
 from telegram.error import TelegramError
 
 DEFAULT_ERROR_NOTIFY_TEXT = """
@@ -51,7 +51,7 @@ class TelegramComponent(BasicComponent):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._app: telegram.ext.Application | None = None
+        self._app: Application | None = None
         self._error_notify_text = DEFAULT_ERROR_NOTIFY_TEXT
 
     @staticmethod
@@ -94,7 +94,7 @@ class TelegramComponent(BasicComponent):
             self.logger.error(f"Internal error during error processing", exc_info=e)
 
     @property
-    def application(self) -> telegram.ext.Application:
+    def application(self) -> Application:
         return self._app
 
     def add_handler(self, handler):
@@ -108,7 +108,7 @@ class TelegramComponent(BasicComponent):
                 self.logger.error("Unable to notify %s chat", str(chat_id), exc_info=e)
 
     async def on_initialize(self, config: Config):
-        self._app = telegram.ext.Application.builder().token(config.bot_token).build()
+        self._app = Application.builder().token(config.bot_token).build()
         self._app.add_error_handler(self.__error_handler)
         self._app.add_handler(telegram.ext.CommandHandler("test", self.__test))
 
