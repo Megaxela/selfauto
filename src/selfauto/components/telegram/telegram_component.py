@@ -5,7 +5,7 @@ from asyncio import sleep
 from selfauto.components.basic_component import BasicComponent
 
 from telegram import Update
-from telegram.ext import ContextTypes, Application
+from telegram.ext import ContextTypes, Application, CommandHandler
 from telegram.error import TelegramError
 
 DEFAULT_ERROR_NOTIFY_TEXT = """
@@ -110,7 +110,7 @@ class TelegramComponent(BasicComponent):
     async def on_initialize(self, config: Config):
         self._app = Application.builder().token(config.bot_token).build()
         self._app.add_error_handler(self.__error_handler)
-        self._app.add_handler(telegram.ext.CommandHandler("test", self.__test))
+        self._app.add_handler(CommandHandler("test", self.__test))
 
     async def __test(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await notify(text="Hello")
