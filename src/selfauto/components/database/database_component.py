@@ -9,7 +9,7 @@ from selfauto.components.basic_component import BasicComponent
 class DatabaseComponent(BasicComponent):
     NAME = "database"
 
-    @dataclasses.dataclass()
+    @dataclass()
     class Config:
         path: str
 
