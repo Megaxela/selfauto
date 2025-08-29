@@ -1,4 +1,4 @@
-import aiohttp
+from aiohttp import ClientSession, TCPConnector
 
 
 class RequestsClient:
@@ -13,8 +13,8 @@ class RequestsClient:
         )
 
     async def __perform_request(self, method, path, **kwargs):
-        async with aiohttp.ClientSession(
-            connector=aiohttp.TCPConnector(ssl=False),
+        async with ClientSession(
+            connector=TCPConnector(ssl=False),
             headers={"PRIVATE-TOKEN": self._token},
         ) as session:
             async with getattr(session, method.lower())(

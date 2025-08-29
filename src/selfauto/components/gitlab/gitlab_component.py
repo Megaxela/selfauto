@@ -1,4 +1,4 @@
-import dataclasses
+from dataclasses import dataclass
 
 from selfauto.components.basic_component import BasicComponent
 from selfauto.components.gitlab.requests_client import RequestsClient
@@ -7,7 +7,7 @@ from selfauto.components.gitlab.requests_client import RequestsClient
 class GitlabComponent(BasicComponent):
     NAME = "gitlab"
 
-    @dataclasses.dataclass()
+    @dataclass()
     class Config:
         token: str
         host: str

@@ -1,18 +1,15 @@
-import logging
-import dataclasses
-import asyncio
+from dataclasses import dataclass
+from asyncio import Lock, sleep
 
-import aiosqlite
+from aiosqlite import Connection, connect
 
 from selfauto.components.basic_component import BasicComponent
-
-logger = logging.getLogger(__name__)
 
 
 class DatabaseComponent(BasicComponent):
     NAME = "database"
 
-    @dataclasses.dataclass()
+    @dataclass()
     class Config:
         path: str
 
@@ -23,20 +20,20 @@ class DatabaseComponent(BasicComponent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._connection: aiosqlite.Connection = None
-        self._semaphore = asyncio.Semaphore(1)
+        self._connection: Connection = None
+        self._semaphore: Lock = Lock()
 
     async def on_initialize(self, config: Config):
-        logger.info("Connecting to database")
+        self.logger.info("Connecting to database")
         self._connection = await aiosqlite.connect(config.path)
-        logger.info("Connected")
+        self.logger.info("Connected")
 
     async def on_deinitialize(self):
         await self._connection.close()
 
     async def run(self):
         while True:
-            await asyncio.sleep(1)
+            await sleep(1)
 
     async def __aenter__(self, *args, **kwargs):
         await self._semaphore.acquire()

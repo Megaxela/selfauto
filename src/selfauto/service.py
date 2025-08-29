@@ -1,8 +1,9 @@
-import logging
-import asyncio
 import typing as tp
 import signal
 import dataclasses
+from logging import getLogger, Logger
+from asyncio import get_event_loop, create_task, gather
+from asyncio.exceptions import CancelledError
 
 import yaml
 import dacite
@@ -12,13 +13,21 @@ from selfauto.config import Config
 from selfauto.components.basic_component import BasicComponent
 from selfauto.utils.asyncio import check_tasks_results_error
 
-logger = logging.getLogger(__name__)
-
 
 class Service:
-    def __init__(self):
+    def __init__(self, logger_factory=None):
         self._components: tp.Dict[str, BasicComponent] = {}
         self._tasks = []
+        self._logger_factory = None
+        self._logger: Logger = None
+
+    @property
+    def logger(self) -> Logger:
+        if self._logger is not None:
+            return self._logger
+
+        self._logger = self.make_logger(__name__)
+        return self._logger
 
     def add_components(self, cls_list):
         for c in cls_list:
@@ -31,14 +40,21 @@ class Service:
         if cls.NAME in self._components:
             raise RuntimeError(f"Component '{cls.NAME}' is already registered")
 
-        self._components[cls.NAME] = cls(self._components)
+        logger = self.make_logger(cls.NAME)
+        self._components[cls.NAME] = cls(self._components, logger, self)
+
+    def make_logger(self, name: str):
+        if self._logger_factory is None:
+            return getLogger(name)
+
+        return self._logger_factory(name)
 
     def __register_interrupt_handler(self):
-        loop = asyncio.get_event_loop()
+        loop = get_event_loop()
 
         signals = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
         for s in signals:
-            loop.add_signal_handler(s, lambda: asyncio.create_task(self.stop()))
+            loop.add_signal_handler(s, lambda: create_task(self.stop()))
 
     async def generate_default_config(self, path: str):
         config = Config(
@@ -54,7 +70,7 @@ class Service:
             await f.write(yaml.dump({"config": dataclasses.asdict(config)}))
 
     async def stop(self):
-        logging.info("Stopping execution")
+        self.logger.info("Stopping execution")
         for t in self._tasks:
             t.cancel()
 
@@ -63,48 +79,46 @@ class Service:
 
         # Initializing
         try:
-            logger.info("Initializing component")
+            self.logger.info("Initializing component")
             self._tasks = []
             for name, component in self._components.items():
                 self._tasks.append(
-                    asyncio.create_task(
+                    create_task(
                         self._initialize_component(component, config),
                         name=f"{name}-initialize",
                     )
                 )
 
             if not await check_tasks_results_error(
-                await asyncio.gather(*self._tasks, return_exceptions=True)
+                await gather(*self._tasks, return_exceptions=True)
             ):
                 return
 
             # Running
-            logger.info("Initialization finished. Running components")
+            self.logger.info("Initialization finished. Running components")
             self._tasks = []
             for name, component in self._components.items():
                 self._tasks.append(
-                    asyncio.create_task(
-                        self._run_component(component), name=f"{name}-run"
-                    )
+                    create_task(self._run_component(component), name=f"{name}-run")
                 )
 
             if not await check_tasks_results_error(
-                await asyncio.gather(*self._tasks, return_exceptions=True)
+                await gather(*self._tasks, return_exceptions=True)
             ):
                 return
         finally:
-            logger.info("Deinitializing component")
+            self.logger.info("Deinitializing component")
             self._tasks = []
             for name, component in self._components.items():
                 self._tasks.append(
-                    asyncio.create_task(
+                    create_task(
                         self._deinitialize_component(component),
                         name=f"{name}-deinitialize",
                     )
                 )
 
             if not await check_tasks_results_error(
-                await asyncio.gather(*self._tasks, return_exceptions=True)
+                await gather(*self._tasks, return_exceptions=True)
             ):
                 return
 
@@ -125,7 +139,7 @@ class Service:
 
             await component.initialize(component_config)
         except Exception as e:
-            logger.error(
+            self.logger.error(
                 "Received exception during initialization of '%s' component",
                 type(component).NAME,
                 exc_info=e,
@@ -136,7 +150,7 @@ class Service:
         try:
             await component.deinitialize()
         except Exception as e:
-            logger.error(
+            self.logger.error(
                 "Received exception during deinitialization of '%s' component",
                 type(component).NAME,
                 exc_info=e,
@@ -146,10 +160,10 @@ class Service:
     async def _run_component(self, component):
         try:
             await component.run()
-        except asyncio.exceptions.CancelledError:
+        except CancelledError:
             return
         except Exception as e:
-            logger.error(
+            self.logger.error(
                 "Received exception running '%s' component",
                 type(component).NAME,
                 exc_info=e,

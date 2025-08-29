@@ -1,4 +1,4 @@
-import dataclasses
+from dataclasses import dataclass
 from typing import List
 
 import aiohttp.web
@@ -10,14 +10,19 @@ from .basic_middleware import BasicMiddleware
 class WebserverComponent(BasicComponent):
     NAME = "webserver"
 
-    @dataclasses.dataclass()
+    @dataclass()
     class Config:
         listen: str
         port: int
+        access_log_enabled: bool = True
 
     @staticmethod
     def make_default_config():
-        return WebserverComponent.Config(listen="127.0.0.1", port=2000)
+        return WebserverComponent.Config(
+            listen="127.0.0.1",
+            port=2000,
+            access_log_enabled=False,
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,6 +49,7 @@ class WebserverComponent(BasicComponent):
             port=self._config.port,
             handle_signals=False,
             print=None,
+            access_log=self.logger if self._config.access_log_enabled else None,
         )
 
     def __make_handler(self, actual_handler):

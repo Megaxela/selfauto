@@ -1,34 +1,55 @@
-import abc
-import asyncio
-import logging
+from abc import ABC, abstractmethod
+from typing import Dict
+from logging import Logger
+from asyncio import Condition
 import inspect
 import os
 
 import aiofiles
 
-logger = logging.getLogger(__name__)
 
+class BasicComponent(ABC):
+    def __init__(
+        self,
+        components: Dict[str, "BasicComponent"],
+        logger: Logger,
+        service: "Service",
+    ):
+        self._components: Dict[str, "BasicComponent"] = components
+        self._initialized: bool = False
+        self._initialized_condvar: Condition = Condition()
+        self._logger: Logger = logger
+        self._service = service
 
-class BasicComponent(abc.ABC):
-    def __init__(self, components):
-        self._components = components
-        self._initialized = False
-        self._initialized_condvar = asyncio.Condition()
+    @property
+    def logger(self) -> Logger:
+        return self._logger
+
+    @property
+    def service(self) -> "Service":
+        return self._service
 
     async def wait_for_initialization(self):
         async with self._initialized_condvar:
             await self._initialized_condvar.wait_for(lambda: self._initialized)
 
-    async def find_component(self, component):
+    async def find_component(self, component) -> "BasicComponent":
+        component_name = None
         if isinstance(component, str):
-            component = self._components.get(component)
+            component_name = component
         else:
-            component = self._components.get(component.NAME)
+            component_name = component.NAME
+
+        component = self._components.get(component_name)
 
         if component is None:
+            self.logger.error(
+                "Unable to find component '%s'",
+                component_name,
+            )
             return None
 
-        logger.info(
+        self.logger.info(
             "Fetching component to '%s' <- '%s'",
             type(self).NAME,
             type(component).NAME,
@@ -64,7 +85,7 @@ class BasicComponent(abc.ABC):
     async def run(self):
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     async def on_initialize(self, config):
         pass
 
