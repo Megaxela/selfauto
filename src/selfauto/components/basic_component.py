@@ -79,6 +79,9 @@ class BasicComponent(ABC):
         async with self._initialized_condvar:
             self._initialized_condvar.notify_all()
 
+    async def post_initialize(self):
+        await self.on_post_initialize()
+
     async def deinitialize(self):
         await self.on_deinitialize()
 
@@ -87,6 +90,9 @@ class BasicComponent(ABC):
 
     @abstractmethod
     async def on_initialize(self, config):
+        pass
+
+    async def on_post_initialize(self):
         pass
 
     async def on_deinitialize(self):

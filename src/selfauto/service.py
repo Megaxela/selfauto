@@ -94,6 +94,17 @@ class Service:
             ):
                 return
 
+            # Calling postinit component hooks
+            self.logger.info("Running postinit hooks")
+            self._tasks = []
+            for name, component in self._components.items():
+                self._tasks.append(
+                    create_task(
+                        self._postinit_component(component),
+                        name=f"{name}-postinit",
+                    )
+                )
+
             # Running
             self.logger.info("Initialization finished. Running components")
             self._tasks = []
@@ -141,6 +152,17 @@ class Service:
         except Exception as e:
             self.logger.error(
                 "Received exception during initialization of '%s' component",
+                type(component).NAME,
+                exc_info=e,
+            )
+            raise
+
+    async def _postinit_component(self, component):
+        try:
+            await component.post_initialize()
+        except Exception as e:
+            self.logger.error(
+                "Received exception during postinit of '%s' component",
                 type(component).NAME,
                 exc_info=e,
             )
