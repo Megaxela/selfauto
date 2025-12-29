@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "selfauto"
-version = "0.0.1"
+version = "0.0.2"
 
 dependencies = [
     "python-telegram-bot >= 21",
@@ -15,7 +15,8 @@ dependencies = [
     "aiosqlite >= 0.20",
     "dacite",
     "pyyaml",
-    "aiofiles"
+    "aiofiles",
+    "croniter"
 ]
 
 authors = [
