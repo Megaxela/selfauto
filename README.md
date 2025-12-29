@@ -30,6 +30,23 @@ A component, that provides telegram bot API for other components.
 bot_token: <token> # Token for telegram bot
 ```
 
+### `events`
+A component, that provides eventing mechanism that may be used by other components.
+
+#### Config
+This component has no config.
+
+### `scheduler`
+A component, that fires event `ScheduleTriggered` via `events` component by cron schedule syntax. 
+`label` field from config will be provided into `label` event field.
+
+#### Config
+```yaml
+schedules:
+- label: event_label
+  cron_string: '*/5 * * * *'
+```
+
 ## Usage
 ### `main.py`
 ```python
