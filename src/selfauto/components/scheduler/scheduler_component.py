@@ -4,9 +4,9 @@ from datetime import datetime, timezone, timedelta
 from asyncio import sleep, create_task, gather
 
 from selfauto.components.basic_component import BasicComponent
+from selfauto.components import events
 from croniter import croniter
 
-from components import events
 from .event import ScheduleTriggered
 
 
