@@ -1,7 +1,7 @@
 from typing import ClassVar
 from dataclasses import dataclass
 
-from components.events import BasicEvent
+from selfauto.components.events import BasicEvent
 
 
 @dataclass()
