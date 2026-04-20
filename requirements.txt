@@ -5,3 +5,6 @@ dacite
 pyyaml
 aiofiles
 croniter
+pyserial-asyncio
+authlib
+aiohttp_session[secure]

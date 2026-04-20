@@ -16,7 +16,10 @@ dependencies = [
     "dacite",
     "pyyaml",
     "aiofiles",
-    "croniter"
+    "croniter",
+    "pyseerial-asyncio",
+    "authlib",
+    "aiohttp_session[secure]"
 ]
 
 authors = [
