@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from selfauto.components import webserver
-from components.webserver_authentication.sessions.store import SessionStore
+from selfauto.components.webserver_authentication.sessions.store import SessionStore
 
 from .generic import GenericTemplate
 

@@ -18,7 +18,7 @@ class Service:
     def __init__(self, logger_factory=None):
         self._components: tp.Dict[str, BasicComponent] = {}
         self._tasks = []
-        self._logger_factory = None
+        self._logger_factory = logger_factory
         self._logger: Logger = None
 
     @property

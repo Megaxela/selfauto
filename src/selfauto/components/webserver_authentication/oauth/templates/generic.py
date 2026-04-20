@@ -5,8 +5,8 @@ from urllib.parse import quote_plus
 
 from aiohttp_session import get_session
 from selfauto.components import webserver
-from components.webserver_authentication.sessions.store import SessionStore
-from components.webserver_authentication.sessions.user_info import UserInfo
+from selfauto.components.webserver_authentication.sessions.store import SessionStore
+from selfauto.components.webserver_authentication.sessions.user_info import UserInfo
 
 from authlib.integrations.httpx_client import AsyncOAuth2Client
 from aiohttp.web import Request, json_response, Response, HTTPFound, HTTPBadRequest
