@@ -17,7 +17,7 @@ dependencies = [
     "pyyaml",
     "aiofiles",
     "croniter",
-    "pyseerial-asyncio",
+    "pyserial-asyncio",
     "authlib",
     "aiohttp_session[secure]"
 ]
