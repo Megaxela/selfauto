@@ -3,12 +3,11 @@ from typing import List, Any, Dict
 
 from aiohttp.web import Request, json_response
 from selfauto.components.basic_component import BasicComponent
-from selfauto.components import webserver
+from selfauto.components import webserver, authentication
 from cryptography import fernet
 from aiohttp_session import setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
-from components import authentication
 from .sessions.store import SessionStore
 from .middleware import Middleware
 from .config import WebserverAuthenticationConfig, HeaderTokenAuthConfig, OAuthConfig
