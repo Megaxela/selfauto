@@ -3,9 +3,9 @@ from aiohttp.web import Request, Response
 from aiohttp.web_exceptions import HTTPForbidden
 
 from selfauto.components.webserver import BasicMiddleware
+from selfauto.components import authentication
 from .sessions.store import SessionStore
 
-from components import authentication
 from .config import WebserverAuthenticationConfig, HeaderTokenAuthConfig
 
 
@@ -17,7 +17,7 @@ class Middleware(BasicMiddleware):
         config: WebserverAuthenticationConfig,
         logger: Logger,
         *args,
-        **kwargs
+        **kwargs,
     ):
         self._auth_component: authentication.Component = auth_component
         self._config: WebserverAuthenticationConfig = config
