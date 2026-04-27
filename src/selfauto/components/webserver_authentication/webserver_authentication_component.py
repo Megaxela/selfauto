@@ -98,8 +98,9 @@ class WebserverAuthenticationComponent(BasicComponent):
         setup(webserver_component._app, EncryptedCookieStorage(f))
 
         # Proceed OAuth providers
-        for oauth_config in self._config.oauth.providers:
-            await self.__setup_oauth(webserver_component, oauth_config)
+        if self._config.oauth:
+            for oauth_config in self._config.oauth.providers:
+                await self.__setup_oauth(webserver_component, oauth_config)
 
         # Handler to list available OAuth providers
         webserver_component.add_handler(
